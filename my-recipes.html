@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-key="myRecipesTitle">My Recipes - Recipe App</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <h1 data-key="myRecipesTitle">My Recipes</h1>
+            <div class="header-buttons">
+                <a href="index.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    <span data-key="backToAll">Back to All Recipes</span>
+                </a>
+                <select class="language-switcher">
+                    <option value="en" data-key="langEN">English</option>
+                    <option value="de" data-key="langDE">Deutsch</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <div class="main-content">
+            <!-- Search and Filters -->
+            <div class="search-section">
+                <input type="text" id="search-bar" placeholder="Search for ingredients..." data-key="searchPlaceholder">
+                <div class="filter-tags" id="filter-tags">
+                    <span class="filter-tag active" data-filter="all" data-key="filterAll">All</span>
+                    <span class="filter-tag" data-filter="vegan" data-key="filterVegan">Vegan</span>
+                    <span class="filter-tag" data-filter="vegetarian" data-key="filterVegetarian">Vegetarian</span>
+                    <span class="filter-tag" data-filter="quick" data-key="filterQuick">Quick</span>
+                    <span class="filter-tag" data-filter="low carb" data-key="filterLowCarb">Low Carb</span>
+                    <span class="filter-tag" data-filter="high protein" data-key="filterHighProtein">High Protein</span>
+                </div>
+            </div>
+
+            <!-- Recipe Grid -->
+            <div class="recipe-grid" id="recipe-grid">
+                <!-- Recipes will be loaded here -->
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="empty-state" style="display: none;">
+                <div class="empty-state-content">
+                    <i class="fas fa-utensils"></i>
+                    <h2 data-key="noUserRecipes">No recipes yet</h2>
+                    <p data-key="noUserRecipesDesc">You haven't added any recipes yet. Click the button below to add your first recipe!</p>
+                    <button class="add-first-recipe-btn" id="add-first-recipe-btn" data-key="addFirstRecipe">Add Your First Recipe</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Add Recipe Button -->
+    <button class="floating-add-btn" id="floating-add-btn" title="Add Your Own Recipe">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Recipe Detail Modal -->
+    <div id="detail-modal" class="modal">
+        <div class="modal-content" id="modal-content">
+            <!-- Modal content will be loaded here -->
+            <span class="close-btn"><span data-key="closeModal">&times;</span></span>
+        </div>
+    </div>
+
+    <!-- Add Recipe Modal -->
+    <div id="add-recipe-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn"><span data-key="closeModal">&times;</span></span>
+            <h2 data-key="newRecipeTitle">Add a New Recipe</h2>
+            <form id="add-recipe-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="form-title" data-key="recipeName">Recipe Name</label>
+                        <input type="text" id="form-title" required>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="form-desc" data-key="description">Description</label>
+                        <textarea id="form-desc" rows="2"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="form-image-url" data-key="imageUrl">Image URL</label>
+                        <input type="url" id="form-image-url">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="form-ingredients" data-key="ingredients">Ingredients (comma-separated)</label>
+                        <textarea id="form-ingredients" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="form-instructions" data-key="instructions">Instructions</label>
+                        <textarea id="form-instructions" rows="5"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label data-key="tags">Tags</label>
+                        <div class="tag-selection-container">
+                            <div class="existing-tags" id="existing-tags">
+                                <!-- Existing tags will be populated by JavaScript -->
+                            </div>
+                            <button type="button" id="add-custom-tag-btn" class="add-custom-tag-btn" title="Add custom tag">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <div class="selected-tags" id="selected-tags">
+                                <!-- Selected tags will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-calories" data-key="calories">Calories</label>
+                        <input type="number" id="form-calories" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-carbs" data-key="carbs">Carbs (g)</label>
+                        <input type="number" id="form-carbs" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-protein" data-key="protein">Protein (g)</label>
+                        <input type="number" id="form-protein" min="0">
+                    </div>
+                </div>
+                <button type="submit" id="form-save-btn" data-key="saveRecipe">Save Recipe</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="my-recipes.js"></script>
+</body>
+</html> 
