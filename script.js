@@ -846,10 +846,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const customRecipes = JSON.parse(localStorage.getItem('customRecipes')) || [];
                 let filteredRecipes = [...initialRecipes, ...customRecipes];
 
-                if (filter !== 'all') {
+                if (filter && filter !== 'all') {
                     filteredRecipes = filteredRecipes.filter(recipe => {
                         const tags = recipe.tags[currentLanguage] || recipe.tags.en;
-                        return tags.some(tag => tag.toLowerCase() === filter.toLowerCase());
+                        return tags.some(tag => tag && filter && tag.toLowerCase() === filter.toLowerCase());
                     });
                 }
                 // If filter is 'all', show all recipes (no filtering)
@@ -1116,6 +1116,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Shopping list remove item functionality
+    if (shoppingListContainer) {
+        shoppingListContainer.addEventListener('click', (e) => {
+            if (e.target.closest('.remove-item-btn')) {
+                const button = e.target.closest('.remove-item-btn');
+                const index = parseInt(button.dataset.index);
+                
+                // Remove item from shopping list
+                shoppingList.splice(index, 1);
+                localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+                
+                // Re-render the shopping list
+                renderShoppingList();
+            }
+        });
+    }
+
     if (shareListBtn) {
         shareListBtn.addEventListener('click', () => {
             if (shoppingList.length === 0) {
@@ -1345,4 +1362,141 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     init();
+
+    // --- Category Dropdown Logic ---
+    const categoriesDropdownToggle = document.getElementById('categories-dropdown-toggle');
+    const categoriesDropdownMenu = document.getElementById('categories-dropdown-menu');
+    let currentCategory = null;
+
+    function getAllDropdownTags() {
+        // Collect all unique tags from recipes, excluding 'all', 'favorites', and already visible tags
+        const allTags = new Set();
+        const customRecipes = JSON.parse(localStorage.getItem('customRecipes')) || [];
+        const allRecipes = [...initialRecipes, ...customRecipes];
+        allRecipes.forEach(recipe => {
+            const tags = recipe.tags[currentLanguage] || recipe.tags.en;
+            tags.forEach(tag => {
+                if (!['all', 'favorites'].includes(tag.toLowerCase())) {
+                    allTags.add(tag);
+                }
+            });
+        });
+        return Array.from(allTags).sort();
+    }
+
+    function populateCategoriesDropdownRefactored() {
+        if (!categoriesDropdownMenu) return;
+        categoriesDropdownMenu.innerHTML = '';
+        const categories = getAllDropdownTags();
+        categories.forEach(category => {
+            const btn = document.createElement('button');
+            btn.className = 'dropdown-tag';
+            btn.type = 'button';
+            btn.textContent = category.charAt(0).toUpperCase() + category.slice(1);
+            btn.dataset.filter = category;
+            btn.addEventListener('click', () => {
+                // Remove active from all dropdown tags
+                categoriesDropdownMenu.querySelectorAll('.dropdown-tag').forEach(tag => tag.classList.remove('active'));
+                btn.classList.add('active');
+                // Remove active from filter-tag buttons
+                document.querySelectorAll('.filter-tag').forEach(tag => tag.classList.remove('active'));
+                // Set dropdown label
+                categoriesDropdownToggle.innerHTML = category.charAt(0).toUpperCase() + category.slice(1) + ' <i class="fas fa-chevron-down"></i>';
+                // Filter recipes
+                filterByCategory(category);
+                // Close dropdown
+                categoriesDropdownMenu.classList.remove('show');
+            });
+            categoriesDropdownMenu.appendChild(btn);
+        });
+    }
+
+    // Replace the old call with the new one
+    populateCategoriesDropdownRefactored();
+
+    // Ensure dropdown is always in front (already handled in CSS)
+    // Mobile responsiveness is handled by CSS
+
+    function filterByCategory(category) {
+        const customRecipes = JSON.parse(localStorage.getItem('customRecipes')) || [];
+        let filteredRecipes = [...initialRecipes, ...customRecipes];
+        if (category) {
+            filteredRecipes = filteredRecipes.filter(recipe => {
+                const tags = recipe.tags[currentLanguage] || recipe.tags.en;
+                return tags.some(tag => tag && category && tag.toLowerCase() === category.toLowerCase());
+            });
+        }
+        renderRecipes(filteredRecipes);
+        currentCategory = category;
+    }
+
+    if (categoriesDropdownToggle && categoriesDropdownMenu) {
+        categoriesDropdownToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            categoriesDropdownMenu.classList.toggle('show');
+            categoriesDropdownToggle.classList.toggle('active');
+            if (categoriesDropdownMenu.classList.contains('show')) {
+                // Position the dropdown absolutely below the toggle button
+                const rect = categoriesDropdownToggle.getBoundingClientRect();
+                categoriesDropdownMenu.style.position = 'absolute';
+                categoriesDropdownMenu.style.top = `${rect.bottom + window.scrollY}px`;
+                categoriesDropdownMenu.style.left = `${rect.left + window.scrollX}px`;
+                categoriesDropdownMenu.style.width = `${rect.width}px`;
+                categoriesDropdownMenu.style.minWidth = '180px';
+                categoriesDropdownMenu.style.zIndex = 12000;
+            } else {
+                categoriesDropdownMenu.style.top = '';
+                categoriesDropdownMenu.style.left = '';
+                categoriesDropdownMenu.style.width = '';
+            }
+        });
+        // Close dropdown on outside click
+        document.addEventListener('click', (e) => {
+            if (!categoriesDropdownMenu.contains(e.target) && !categoriesDropdownToggle.contains(e.target)) {
+                categoriesDropdownMenu.classList.remove('show');
+                categoriesDropdownToggle.classList.remove('active');
+            }
+        });
+        // Keyboard accessibility
+        categoriesDropdownToggle.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                categoriesDropdownMenu.classList.toggle('show');
+                categoriesDropdownToggle.classList.toggle('active');
+                if (categoriesDropdownMenu.classList.contains('show')) {
+                    const rect = categoriesDropdownToggle.getBoundingClientRect();
+                    categoriesDropdownMenu.style.position = 'absolute';
+                    categoriesDropdownMenu.style.top = `${rect.bottom + window.scrollY}px`;
+                    categoriesDropdownMenu.style.left = `${rect.left + window.scrollX}px`;
+                    categoriesDropdownMenu.style.width = `${rect.width}px`;
+                    categoriesDropdownMenu.style.minWidth = '180px';
+                    categoriesDropdownMenu.style.zIndex = 12000;
+                } else {
+                    categoriesDropdownMenu.style.top = '';
+                    categoriesDropdownMenu.style.left = '';
+                    categoriesDropdownMenu.style.width = '';
+                }
+            }
+        });
+    }
+
+    // On page load, populate dropdown
+    populateCategoriesDropdownRefactored();
+
+    // When All or Favorites is clicked, reset dropdown label
+    const allBtn = document.querySelector('[data-filter="all"]');
+    if (allBtn) {
+        allBtn.addEventListener('click', () => {
+            categoriesDropdownToggle.innerHTML = 'Categories <i class="fas fa-chevron-down"></i>';
+            categoriesDropdownMenu.querySelectorAll('.dropdown-tag').forEach(tag => tag.classList.remove('active'));
+            currentCategory = null;
+        });
+    }
+    if (favoritesBtn) {
+        favoritesBtn.addEventListener('click', () => {
+            categoriesDropdownToggle.innerHTML = 'Categories <i class="fas fa-chevron-down"></i>';
+            categoriesDropdownMenu.querySelectorAll('.dropdown-tag').forEach(tag => tag.classList.remove('active'));
+            currentCategory = null;
+        });
+    }
 }); 
